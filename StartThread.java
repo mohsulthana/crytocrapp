@@ -9,6 +9,10 @@ import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import static rijndael.Main.IV;
+import static rijndael.Main.decrypt;
+import static rijndael.Main.encrypt;
+import static rijndael.Main.encryptionKey;
+import static rijndael.Main.plaintext;
 
 /**
  *
@@ -65,6 +69,27 @@ class Multithread implements Runnable {
 
 public class StartThread {
     public static void main(String args[]) {
+        try {
+            System.out.println("===JAVA===");
+            System.out.println("Plain: " + plaintext);
+            
+            byte[] cipher = encrypt(plaintext, encryptionKey);
+            
+            System.out.print("cipher:  ");
+            
+            for (int i=0; i<cipher.length; i++)
+                System.out.print(new Integer(cipher[i])+" ");
+            
+            System.out.println("");
+            
+            String decrypted = decrypt(cipher, encryptionKey);
+            
+            System.out.println("decrypt: " + decrypted);
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+                
         Multithread R1 = new Multithread("Thread w");
         R1.start();
         
