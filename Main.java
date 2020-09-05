@@ -15,7 +15,7 @@ import javax.crypto.spec.SecretKeySpec;
  */
 public class Main {
     static String IV = "AAAAAAAAAAAAAAAA";
-    static String plaintext = "Yeeeeeeeeeeeesssssssssssssssssssssssss!";
+    static String plaintext = "1234567890123456789009876543210987654321";
     static String encryptionKey = "0123456789abcdef";
 
     /**
