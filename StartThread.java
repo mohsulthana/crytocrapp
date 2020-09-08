@@ -5,16 +5,13 @@
  */
 package rijndael;
 
+import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import static rijndael.Main.IV;
-import static rijndael.Main.decrypt;
-import static rijndael.Main.encrypt;
-import static rijndael.Main.encryptionKey;
-import static rijndael.Main.plaintext;
 
 /**
  *
@@ -29,7 +26,7 @@ class Cryptography {
     }
     
     public static String decrypt(byte[] cipherText, String encryptionKey) throws Exception {
-        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS7Padding", "SunJCE");
+        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding", "SunJCE");
         SecretKeySpec key = new SecretKeySpec(encryptionKey.getBytes("UTF-8"), "AES");
         cipher.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(IV.getBytes("UTF-8")));
         return new String(cipher.doFinal(cipherText), "UTF-8");
@@ -40,12 +37,19 @@ class Cryptography {
 class Multithread implements Runnable {
     private Thread t;
     private String threadName;
-    private String plainText;
+    protected String plainText;
+    protected String encKey;
     
-    Multithread(String name, String plain) {
+    Multithread(String name, String plain, String encryptionKey) {
         threadName = name;
         plainText = plain;
+        encKey = encryptionKey;
+        
         System.out.println("Creating " + threadName);
+    }
+
+    Multithread() {
+        
     }
 
     @Override
@@ -54,14 +58,15 @@ class Multithread implements Runnable {
         try {
             
             Cryptography crypto = new Cryptography();
-            byte[] chip = crypto.encrypt(plainText, encryptionKey);
+            System.out.println(encKey);
+            byte[] chip = crypto.encrypt(plainText, encKey);
             
             System.out.print("Chiper :  ");
             for (int i=0; i<chip.length; i++)
                 System.out.print(new Integer(chip[i])+" ");
             System.out.println("");
             
-            String decrypted = decrypt(chip, encryptionKey);
+            String decrypted = crypto.decrypt(chip, encKey);
             System.out.println("decrypt: " + decrypted);
             
         } catch (InterruptedException e) {
@@ -82,24 +87,60 @@ class Multithread implements Runnable {
     }
 }
 
-public class StartThread {
+public class StartThread  {
     public static void main(String args[]) {
+        Multithread multi = new Multithread();
         try {
             System.out.println("===JAVA===");
-            System.out.println("Plain: " + plaintext);
+            System.out.println("Plain: " + multi.plainText);
         } catch (Exception e) {
             e.printStackTrace();
         }
         
-        int plainLength = plaintext.length();
+        int plainLength = multi.plainText.length();
+        String firstPart = multi.plainText.substring(0, plainLength / 2);
+        String secondPart = multi.plainText.substring(plainLength / 2, plainLength);
         
-        String firstPart = plaintext.substring(0, plainLength / 2);
-        String secondPart = plaintext.substring(plainLength / 2, plainLength);
+//        Single thread
+//        Multithread single = new Multithread("Single", plaintext);
                 
-        Multithread R1 = new Multithread("Thread first", firstPart);
-        R1.start();
+//        Multithread
+//        Multithread firstThread = new Multithread("Thread first", firstPart);
+//        firstThread.start();
+//        
+//        Multithread secondThread = new Multithread("Thread second", secondPart);
+//        secondThread.start();
         
-        Multithread R2 = new Multithread("Thread second", secondPart);
-        R2.start();
+//        3 Thread
+//            Multithread firstThread = new Multithread("Thread first", firstPart, multi.encKey);
+//            firstThread.start();
+//
+//            Multithread secondThread = new Multithread("Thread second", secondPart, multi.encryptionKey);
+//            secondThread.start();
+//            
+//            Multithread thirdThread = new Multithread("Thread third", firstPart, multi.encryptionKey);
+//            thirdThread.start();
+//            
+//            Multithread fourthThread = new Multithread("Thread fourth", secondPart, multi.encryptionKey);
+//            fourthThread.start();
+    }
+    
+    public StartThread(String plaintext, int part) {
+        int strSize = plaintext.length();
+        int partSize;
+        
+        if (strSize % part != 0)
+        {
+            System.out.println("Invalid Input: String size is not divisible by n"); 
+            return;
+        }
+        
+        partSize = strSize / part;
+        
+        for (int i = 0; i < strSize; i++) {
+            if (i % partSize == 0)
+                System.out.println();
+            System.out.println(plaintext.charAt(i));
+        }
     }
 }
