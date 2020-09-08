@@ -5,7 +5,6 @@
  */
 package rijndael;
 
-import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.crypto.Cipher;
@@ -58,16 +57,16 @@ class Multithread implements Runnable {
         try {
             
             Cryptography crypto = new Cryptography();
-            System.out.println(encKey);
+            long start = System.currentTimeMillis();
             byte[] chip = crypto.encrypt(plainText, encKey);
             
-            System.out.print("Chiper :  ");
             for (int i=0; i<chip.length; i++)
-                System.out.print(new Integer(chip[i])+" ");
-            System.out.println("");
+                System.out.print("");
             
             String decrypted = crypto.decrypt(chip, encKey);
-            System.out.println("decrypt: " + decrypted);
+            
+            long end = System.currentTimeMillis();
+            System.out.println(end - start);
             
         } catch (InterruptedException e) {
             System.out.println("Thread " + threadName + " interrupted");
@@ -96,33 +95,6 @@ public class StartThread  {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        
-        int plainLength = multi.plainText.length();
-        String firstPart = multi.plainText.substring(0, plainLength / 2);
-        String secondPart = multi.plainText.substring(plainLength / 2, plainLength);
-        
-//        Single thread
-//        Multithread single = new Multithread("Single", plaintext);
-                
-//        Multithread
-//        Multithread firstThread = new Multithread("Thread first", firstPart);
-//        firstThread.start();
-//        
-//        Multithread secondThread = new Multithread("Thread second", secondPart);
-//        secondThread.start();
-        
-//        3 Thread
-//            Multithread firstThread = new Multithread("Thread first", firstPart, multi.encKey);
-//            firstThread.start();
-//
-//            Multithread secondThread = new Multithread("Thread second", secondPart, multi.encryptionKey);
-//            secondThread.start();
-//            
-//            Multithread thirdThread = new Multithread("Thread third", firstPart, multi.encryptionKey);
-//            thirdThread.start();
-//            
-//            Multithread fourthThread = new Multithread("Thread fourth", secondPart, multi.encryptionKey);
-//            fourthThread.start();
     }
     
     public StartThread(String plaintext, int part) {

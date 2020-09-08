@@ -38,7 +38,7 @@ public class ChatFrameSender extends javax.swing.JFrame {
         kunciRahasia = new javax.swing.JTextField();
         jLabel3 = new javax.swing.JLabel();
         jScrollPane3 = new javax.swing.JScrollPane();
-        jTextArea2 = new javax.swing.JTextArea();
+        chatRoom = new javax.swing.JTextArea();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -58,9 +58,9 @@ public class ChatFrameSender extends javax.swing.JFrame {
 
         jLabel3.setText("Kunci Rahasia");
 
-        jTextArea2.setColumns(20);
-        jTextArea2.setRows(5);
-        jScrollPane3.setViewportView(jTextArea2);
+        chatRoom.setColumns(20);
+        chatRoom.setRows(5);
+        jScrollPane3.setViewportView(chatRoom);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -125,8 +125,23 @@ public class ChatFrameSender extends javax.swing.JFrame {
             } else {
                 String plainText = pengirimField.getText();
                 String encKey = kunciRahasia.getText();
-                Multithread multi = new Multithread("Thread1", plainText, encKey);
-                multi.start();   
+                
+//                Single thread
+                Multithread single = new Multithread("Single", plainText, encKey);
+                single.start();
+                
+//                Multithread -- not really spreaded
+//                int plainLength = plainText.length();
+//                String firstPart = plainText.substring(0, plainLength / 2);
+//                String secondPart = plainText.substring(plainLength / 2, plainLength);
+//                
+//                Multithread multi1 = new Multithread("Thread1", firstPart, encKey);
+//                multi1.start();
+//                
+//                Multithread multi2 = new Multithread("Thread2", secondPart, encKey);
+//                multi2.start();
+//                
+                chatRoom.setText(plainText);
             }
         } catch (HeadlessException e) {
             System.out.println(e);
@@ -170,11 +185,11 @@ public class ChatFrameSender extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JTextArea chatRoom;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane3;
-    private javax.swing.JTextArea jTextArea2;
     private javax.swing.JButton kirimPengirim;
     private javax.swing.JTextField kunciRahasia;
     private javax.swing.JTextArea logArea;
