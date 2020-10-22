@@ -7,6 +7,7 @@ package rijndael;
 
 import java.util.ArrayList;
 import java.util.List;
+import javax.crypto.SecretKey;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
@@ -16,14 +17,14 @@ import javax.swing.JTextField;
  */
 public class Rijndael {
     public static String teks;
-    public static String key;
+    public static SecretKey key;
     
-    public Rijndael(String plaintext, String secretKey) {
+    public Rijndael(String plaintext, SecretKey secretKey) {
         teks = plaintext;
         key  = secretKey;
     } 
 
-    private static void waitThreadEnd(List<MyThread> R) {
+    static void waitThreadEnd(List<MyThread> R) {
         // UNTUK TUNGGU THREAD SELESAI
         for (int i = 0; i < R.size(); i++) {
             while(R.get(i).status == true){
@@ -73,9 +74,5 @@ public class Rijndael {
         // HASIL DEKRIPSI
         for (int i = 0; i < jumlah_thread; i++)
             System.out.println("PLAIN: "+ThreadDecrypt.get(i).plain);
-    }
-
-    Rijndael(JTextArea pengirimField, JTextField kunciRahasia) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

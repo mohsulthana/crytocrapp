@@ -6,13 +6,31 @@
 package rijndael;
 
 import java.awt.HeadlessException;
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import java.security.NoSuchAlgorithmException;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.crypto.SecretKey;
+import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import static rijndael.Rijndael.key;
+import static rijndael.Rijndael.waitThreadEnd;
 
 /**
  *
  * @author sulthan
  */
 public class ChatFrameSender extends javax.swing.JFrame {
+    
+    private static final String ENCRYPT_ALGO = "AES/GCM/NoPadding";
+    private static final int TAG_LENGTH_BIT = 128;
+    private static final int IV_LENGTH_BYTE = 12;
+    private static final int AES_KEY_BIT = 128;
 
     /**
      * Creates new form ChatFrame
@@ -30,27 +48,34 @@ public class ChatFrameSender extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        kirimPengirim = new javax.swing.JButton();
+        kirimSingleThread = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         logArea = new javax.swing.JTextArea();
         jLabel1 = new javax.swing.JLabel();
-        kunciRahasia = new javax.swing.JTextField();
-        jLabel3 = new javax.swing.JLabel();
-        jScrollPane3 = new javax.swing.JScrollPane();
-        chatRoom = new javax.swing.JTextArea();
         jScrollPane2 = new javax.swing.JScrollPane();
         pengirimField = new javax.swing.JTextArea();
-        jLabel2 = new javax.swing.JLabel();
         kirimPengirim1 = new javax.swing.JButton();
         kirimPengirim2 = new javax.swing.JButton();
         jLabel4 = new javax.swing.JLabel();
+        jButton1 = new javax.swing.JButton();
+        jScrollPane4 = new javax.swing.JScrollPane();
+        pengirimField1 = new javax.swing.JTextArea();
+        jLabel5 = new javax.swing.JLabel();
+        jButton2 = new javax.swing.JButton();
+        jButton3 = new javax.swing.JButton();
+        jLabel2 = new javax.swing.JLabel();
+        jLabel3 = new javax.swing.JLabel();
+        jLabel6 = new javax.swing.JLabel();
+        waktuDekripsi = new javax.swing.JLabel();
+        waktuEnkripsi = new javax.swing.JLabel();
+        waktuPengirimanPesan = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        kirimPengirim.setText("Kirim - 1");
-        kirimPengirim.addActionListener(new java.awt.event.ActionListener() {
+        kirimSingleThread.setText("Kirim - 1");
+        kirimSingleThread.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                kirimPengirimActionPerformed(evt);
+                kirimSingleThreadActionPerformed(evt);
             }
         });
 
@@ -60,23 +85,9 @@ public class ChatFrameSender extends javax.swing.JFrame {
 
         jLabel1.setText("Pengirim");
 
-        kunciRahasia.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                kunciRahasiaActionPerformed(evt);
-            }
-        });
-
-        jLabel3.setText("Kunci Rahasia");
-
-        chatRoom.setColumns(20);
-        chatRoom.setRows(5);
-        jScrollPane3.setViewportView(chatRoom);
-
         pengirimField.setColumns(20);
         pengirimField.setRows(5);
         jScrollPane2.setViewportView(pengirimField);
-
-        jLabel2.setText("Kolom chat");
 
         kirimPengirim1.setText(" Kirim - 2");
         kirimPengirim1.addActionListener(new java.awt.event.ActionListener() {
@@ -94,91 +105,310 @@ public class ChatFrameSender extends javax.swing.JFrame {
 
         jLabel4.setText("Logger");
 
+        jButton1.setText("Select File - 1");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+
+        pengirimField1.setColumns(20);
+        pengirimField1.setRows(5);
+        jScrollPane4.setViewportView(pengirimField1);
+
+        jLabel5.setText("Penerima");
+
+        jButton2.setText("Select File - 2");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
+
+        jButton3.setText("Select File - 3");
+        jButton3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton3ActionPerformed(evt);
+            }
+        });
+
+        jLabel2.setText("Waktu enkripsi");
+
+        jLabel3.setText("Waktu dekripsi");
+
+        jLabel6.setText("Waktu pengiriman pesan");
+
+        waktuDekripsi.setText("0s");
+
+        waktuEnkripsi.setText("0s");
+
+        waktuPengirimanPesan.setText("0s");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                    .addComponent(jScrollPane1)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap(38, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 819, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addContainerGap())
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel4)
-                            .addComponent(jLabel1)
                             .addGroup(layout.createSequentialGroup()
-                                .addComponent(kirimPengirim, javax.swing.GroupLayout.PREFERRED_SIZE, 118, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(kirimPengirim1, javax.swing.GroupLayout.PREFERRED_SIZE, 118, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(kirimPengirim2, javax.swing.GroupLayout.PREFERRED_SIZE, 118, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                                .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                                    .addComponent(jLabel3)
-                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                    .addComponent(kunciRahasia))
-                                .addComponent(jScrollPane2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 365, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(18, 18, 18)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel2))))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addGap(50, 50, 50)
+                                .addComponent(jLabel1)
+                                .addGap(343, 343, 343))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 378, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(76, 76, 76))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                    .addComponent(jButton1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(kirimSingleThread, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 118, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(kirimPengirim1, javax.swing.GroupLayout.PREFERRED_SIZE, 118, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                        .addComponent(kirimPengirim2, javax.swing.GroupLayout.PREFERRED_SIZE, 118, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 118, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                        .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 118, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                            .addComponent(jLabel4))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLabel6)
+                                    .addComponent(jLabel2)
+                                    .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 365, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jLabel5))
+                                .addGap(34, 34, 34))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addComponent(waktuPengirimanPesan))
+                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                        .addGroup(layout.createSequentialGroup()
+                                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                            .addComponent(waktuEnkripsi))
+                                        .addGroup(layout.createSequentialGroup()
+                                            .addComponent(jLabel3)
+                                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                            .addComponent(waktuDekripsi))))
+                                .addGap(71, 71, 71))))))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addGap(13, 13, 13)
+            .addGroup(layout.createSequentialGroup()
+                .addGap(26, 26, 26)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel1)
-                    .addComponent(jLabel2))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                    .addComponent(jLabel5))
+                .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(kirimSingleThread)
+                    .addComponent(kirimPengirim1)
+                    .addComponent(kirimPengirim2))
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGap(3, 3, 3)
+                        .addComponent(waktuPengirimanPesan)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jButton1)
+                            .addComponent(jButton2)
+                            .addComponent(jButton3)
+                            .addComponent(jLabel2)
+                            .addComponent(waktuEnkripsi))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel3)
-                            .addComponent(kunciRahasia, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(18, 18, 18)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(kirimPengirim)
-                            .addComponent(kirimPengirim1)
-                            .addComponent(kirimPengirim2))
-                        .addGap(18, 18, 18)
-                        .addComponent(jLabel4))
-                    .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 178, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(23, Short.MAX_VALUE))
+                            .addComponent(waktuDekripsi))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 20, Short.MAX_VALUE)
+                        .addComponent(jLabel4)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(21, 21, 21))
+                    .addGroup(layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabel6)
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void kirimPengirimActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_kirimPengirimActionPerformed
+    private void kirimSingleThreadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_kirimSingleThreadActionPerformed
         // TODO add your handling code here:
-        try {
-            if (kunciRahasia.getText().trim().length() == 0) {
-                JOptionPane.showMessageDialog(null, "Kunci Rahasia tidak boleh kosong.", "Dialog", JOptionPane.ERROR_MESSAGE);
-            } else {
-                Rijndael main = new Rijndael(pengirimField, kunciRahasia);
-            }
-        } catch (HeadlessException e) {
-            System.out.println(e);
+        try
+        {
+            String teks = pengirimField.getText();
+
+            SecretKey secretKey = CryptoUtils.getAESKey(AES_KEY_BIT);
+            byte[] iv = CryptoUtils.getRandomNonce(IV_LENGTH_BYTE);
+            String OUTPUT_FORMAT = "%-30s:%s"; 
+            
+            long startEnc = System.currentTimeMillis();
+            byte[] encryptedText = EncryptorAesGcm.encryptWithPrefixIV(teks.getBytes(UTF_8), secretKey, iv);
+            System.out.println(encryptedText.getClass().getSimpleName());
+            long elapsedTimeEnc = System.currentTimeMillis() - startEnc;
+
+            logArea.setText("\n------ AES GCM Encryption ------\n");
+            logArea.append(String.format(OUTPUT_FORMAT, "Input (plain text)", teks) + "\n");
+            logArea.append(String.format(OUTPUT_FORMAT, "Key (hex)", CryptoUtils.hex(secretKey.getEncoded()))  + "\n");
+            logArea.append(String.format(OUTPUT_FORMAT, "IV  (hex)", CryptoUtils.hex(iv))  + "\n");
+            logArea.append(String.format(OUTPUT_FORMAT, "Encrypted (hex) ", CryptoUtils.hex(encryptedText))  + "\n");
+            logArea.append(String.format(OUTPUT_FORMAT, "Encrypted (hex) (block = 16)", CryptoUtils.hexWithBlockSize(encryptedText, 16))  + "\n");
+
+            logArea.append("\n\n------ AES GCM Decryption ------\n");
+            logArea.append(String.format(OUTPUT_FORMAT, "Input (hex)", CryptoUtils.hex(encryptedText))  + "\n");
+            logArea.append(String.format(OUTPUT_FORMAT, "Input (hex) (block = 16)", CryptoUtils.hexWithBlockSize(encryptedText, 16))  + "\n");
+            logArea.append(String.format(OUTPUT_FORMAT, "Key (hex)", CryptoUtils.hex(secretKey.getEncoded()))  + "\n");
+            
+            double elapsedTimeInSecondEnc = (double) elapsedTimeEnc / 1000F;
+            waktuEnkripsi.setText(Double.toString(elapsedTimeInSecondEnc) + " detik");
+            
+            
+            long startDec = System.currentTimeMillis();
+            String decryptedText = EncryptorAesGcm.decryptWithPrefixIV(encryptedText, secretKey);
+            long elapsedTimeDec = System.currentTimeMillis() - startDec;
+            double elapsedTimeInSecondDec = (double) elapsedTimeDec / 1000F;
+            waktuDekripsi.setText(Double.toString(elapsedTimeInSecondDec) + " detik");
+            
+            
+            long elapsedTimeTotal = System.currentTimeMillis() - startEnc;
+            waktuPengirimanPesan.setText(Double.toString((double) elapsedTimeTotal / 1000F) + " detik");
+
+            logArea.append(String.format(OUTPUT_FORMAT, "Decrypted (plain text)", decryptedText)  + "\n");
         }
-    }//GEN-LAST:event_kirimPengirimActionPerformed
+        catch (NoSuchAlgorithmException ex)
+        {
+            Logger.getLogger(ChatFrameSender.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        catch (Exception ex)
+        {
+            Logger.getLogger(ChatFrameSender.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_kirimSingleThreadActionPerformed
 
     private void kirimPengirim1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_kirimPengirim1ActionPerformed
-        // TODO add your handling code here:
+        String teks = pengirimField.getText();
+        
+        try
+        {
+            SecretKey secretKey = CryptoUtils.getAESKey(AES_KEY_BIT);
+            
+            List<String> splitted = Criptoapp.doSplit(teks, 2);
+            
+            
+            List<MyThread> ThreadEncrypt = Securing.doEncrypt(splitted, secretKey);
+            System.out.println(ThreadEncrypt.getClass().getSimpleName());
+            
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            DataOutputStream out = new DataOutputStream(baos);
+//            for (MyThread element : ThreadEncrypt) {
+//                out.writeUTF(element);
+//            }
+            byte[] bytes = baos.toByteArray();
+            
+            waitThreadEnd(ThreadEncrypt);
+           
+            // HASIL ENKRIPSI
+            for (int i = 0; i < 2; i++)
+                System.out.println("CIPHER: "+ CryptoUtils.hex(ThreadEncrypt.get(i).cipher));
+//          
+            
+            List<MyThread> ThreadDecrypt = Securing.doDecrypt(ThreadEncrypt, secretKey);
+            System.out.println(ThreadDecrypt);
+//            waitThreadEnd(ThreadDecrypt);
+//            
+//            for (int i = 0; i < 2; i++)
+//                System.out.println("PLAIN: "+ThreadDecrypt.get(i).plain);
+        }
+        catch (NoSuchAlgorithmException e)
+        {
+            Logger.getLogger(ChatFrameSender.class.getName()).log(Level.ALL, null, e);
+        }
     }//GEN-LAST:event_kirimPengirim1ActionPerformed
 
     private void kirimPengirim2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_kirimPengirim2ActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_kirimPengirim2ActionPerformed
 
-    private void kunciRahasiaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_kunciRahasiaActionPerformed
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        JFileChooser chooser = new JFileChooser();
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("ZIP & RAR Files", "zip", "rar");
+        chooser.setFileFilter(filter);
+        int returnVal = chooser.showOpenDialog(null);
+        
+        if (returnVal == JFileChooser.APPROVE_OPTION)
+        {
+            try
+            {
+                String imagePath = chooser.getSelectedFile().getAbsolutePath();
+                
+                String base64Image = FileEncryption.encoder(imagePath);
+
+                SecretKey secretKey = CryptoUtils.getAESKey(AES_KEY_BIT);
+                byte[] iv = CryptoUtils.getRandomNonce(IV_LENGTH_BYTE);
+                String OUTPUT_FORMAT = "%-30s:%s";
+                
+                System.out.println(base64Image);
+
+                long startEnc = System.currentTimeMillis();                
+                byte[] encryptedText = EncryptorAesGcm.encryptWithPrefixIV(base64Image.getBytes(UTF_8), secretKey, iv);
+                System.out.println(encryptedText);
+                long elapsedTimeEnc = System.currentTimeMillis() - startEnc;
+                
+                double elapsedTimeInSecondEnc = (double) elapsedTimeEnc / 1000F;
+                waktuEnkripsi.setText(Double.toString(elapsedTimeInSecondEnc) + " detik");
+
+
+                logArea.setText("\n------ AES GCM Encryption ------\n");
+                logArea.append(String.format(OUTPUT_FORMAT, "Input (plain text)", base64Image) + "\n");
+                logArea.append(String.format(OUTPUT_FORMAT, "Key (hex)", CryptoUtils.hex(secretKey.getEncoded()))  + "\n");
+                logArea.append(String.format(OUTPUT_FORMAT, "IV  (hex)", CryptoUtils.hex(iv))  + "\n");
+                logArea.append(String.format(OUTPUT_FORMAT, "Encrypted (hex) ", CryptoUtils.hex(encryptedText))  + "\n");
+                logArea.append(String.format(OUTPUT_FORMAT, "Encrypted (hex) (block = 16)", CryptoUtils.hexWithBlockSize(encryptedText, 16))  + "\n");
+
+                logArea.append("\n\n------ AES GCM Decryption ------\n");
+                logArea.append(String.format(OUTPUT_FORMAT, "Input (hex)", CryptoUtils.hex(encryptedText))  + "\n");
+                logArea.append(String.format(OUTPUT_FORMAT, "Input (hex) (block = 16)", CryptoUtils.hexWithBlockSize(encryptedText, 16))  + "\n");
+                logArea.append(String.format(OUTPUT_FORMAT, "Key (hex)", CryptoUtils.hex(secretKey.getEncoded()))  + "\n");
+
+                long startDec = System.currentTimeMillis();
+                String decryptedText = EncryptorAesGcm.decryptWithPrefixIV(encryptedText, secretKey);
+                long elapsedTimeDec = System.currentTimeMillis() - startDec;
+                double elapsedTimeInSecondDec = (double) elapsedTimeDec / 1000F;
+                waktuDekripsi.setText(Double.toString(elapsedTimeInSecondDec) + " detik");
+                
+                long elapsedTimeTotal = System.currentTimeMillis() - startEnc;
+                waktuPengirimanPesan.setText(Double.toString((double) elapsedTimeTotal / 1000F) + " detik");
+
+                logArea.append(String.format(OUTPUT_FORMAT, "Decrypted (plain text)", decryptedText)  + "\n");
+            }
+            catch (Exception ex)
+            {
+                Logger.getLogger(ChatFrameSender.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_kunciRahasiaActionPerformed
+    }//GEN-LAST:event_jButton2ActionPerformed
+
+    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jButton3ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -217,19 +447,26 @@ public class ChatFrameSender extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JTextArea chatRoom;
+    private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
+    private javax.swing.JButton jButton3;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JScrollPane jScrollPane3;
-    private javax.swing.JButton kirimPengirim;
+    private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JButton kirimPengirim1;
     private javax.swing.JButton kirimPengirim2;
-    private javax.swing.JTextField kunciRahasia;
+    private javax.swing.JButton kirimSingleThread;
     private javax.swing.JTextArea logArea;
     private javax.swing.JTextArea pengirimField;
+    private javax.swing.JTextArea pengirimField1;
+    private javax.swing.JLabel waktuDekripsi;
+    private javax.swing.JLabel waktuEnkripsi;
+    private javax.swing.JLabel waktuPengirimanPesan;
     // End of variables declaration//GEN-END:variables
 }

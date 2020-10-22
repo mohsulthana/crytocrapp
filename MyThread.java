@@ -5,9 +5,13 @@
  */
 package rijndael;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import java.security.InvalidKeyException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.SecretKey;
 
 /**
  *
@@ -18,15 +22,20 @@ public class MyThread extends Thread{
    public Thread t;
    public String threadName;
    public String plain;
-   public String cipher;
+   public byte[] cipher;
    public String process;
-   public String secretKey;
+   SecretKey secret;
    public boolean status = true;
    
-    MyThread( String name, String str, String p, String key) {
+   private static final String ENCRYPT_ALGO = "AES/GCM/NoPadding";
+   private static final int TAG_LENGTH_BIT = 128;
+   private static final int IV_LENGTH_BYTE = 12;
+   private static final int AES_KEY_BIT = 128;
+   
+    MyThread(String name, String str, String p, SecretKey key) {
         threadName    = name;
         process       = p;
-        secretKey     = key;
+        secret        = key;
         System.out.println("Creating " +  threadName );
         
         // JIKA ENKRIPSI, MAKA STR ADALAH PLAINTEXT
@@ -34,24 +43,28 @@ public class MyThread extends Thread{
             plain = str;
         // JIKA DEKRIPSI, MAKA STR ADALAH CIPHERTEXT
         else
-            cipher = str;
+            cipher = str.getBytes();
         
    }
    
    @Override
     public void run() {
+        byte[] iv = CryptoUtils.getRandomNonce(IV_LENGTH_BYTE);
         try {
             // DO ENCRYPTION
-            if("e".equals(process))
-                cipher = Securing.encrypt(plain, secretKey);
+            if("e".equals(process)) {
+                cipher = EncryptorAesGcm.encryptWithPrefixIV(plain.getBytes(UTF_8), secret, iv);
+            }
             //DO DECRYPTION
             else
-                plain = Securing.decrypt(cipher, secretKey);
+            {
+                plain = EncryptorAesGcm.decryptWithPrefixIV(cipher, secret);
+            }
             
             status = false;
-        } catch (InvalidKeyException | BadPaddingException | IllegalBlockSizeException e) {
-            System.out.println(e);
-        }
+        } catch (Exception ex) {
+           Logger.getLogger(MyThread.class.getName()).log(Level.SEVERE, null, ex);
+       }
    }
    
    @Override

@@ -13,6 +13,7 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import javax.management.openmbean.InvalidKeyException;
 
@@ -72,7 +73,7 @@ class Securing {
         return null;
     }
     
-    public static List<MyThread> doEncrypt(List<String> text, String secret) {
+    public static List<MyThread> doEncrypt(List<String> text, SecretKey secret) {
         List<MyThread> ThreadEncrypt = new ArrayList<>();
         for (int i = 0; i < text.size(); i++) {
             ThreadEncrypt.add(new MyThread("Thread-" + (i+1), text.get(i), "e", secret));
@@ -81,26 +82,13 @@ class Securing {
         return ThreadEncrypt;
     }
     
-    public static List<MyThread> doDecrypt(List<MyThread> ThreadEncrypt, String secret) {
+    public static List<MyThread> doDecrypt(List<MyThread> ThreadEncrypt, SecretKey secret) {
         List<MyThread> ThreadDecrypt = new ArrayList<>();
         for (int i = 0; i < ThreadEncrypt.size(); i++) {
-            ThreadDecrypt.add(new MyThread("Thread-" + (i+1), ThreadEncrypt.get(i).cipher, "d", secret));
+            System.out.println(ThreadEncrypt.get(i).cipher);
+            ThreadDecrypt.add(new MyThread("Thread-" + (i+1), ThreadEncrypt.get(i).cipher.toString(), "d", secret));
             ThreadDecrypt.get(i).start();
         }
         return ThreadDecrypt;
     }
-    
-    static List<String> splitText(String plaintext, int jumlahThread) {
-            List<String> teks       = new ArrayList<>();
-            int bagian              = plaintext.length() / jumlahThread;
-            int start               = 0;
-
-            for (int i = 0; i < jumlahThread - 1; i++) {
-                int end = start + bagian;
-                teks.add(plaintext.substring(start, end));
-                start = end;
-            }
-            teks.add(plaintext.substring(start));
-            return teks;
-        }
 }
